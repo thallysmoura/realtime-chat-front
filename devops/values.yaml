@@ -1,0 +1,74 @@
+namespace: "salamedicacao"
+
+replicaCount: 1
+
+image:
+  repository: desenvolvimentoham/app_salamedicacao
+  tag: latest
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: ham-docker-ecr
+
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+  annotations: {}
+
+env:
+  - name: PORT
+    value: "3000"
+ 
+# securityContext:
+#   runAsUser: 999
+#   runAsGroup: 999
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "256m"
+  limits:
+    memory: "512Mi"
+    cpu: "512m"
+
+volumes: []
+volumeMounts: []
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: 3000
+  initialDelaySeconds: 10
+  timeoutSeconds: 5
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 3000
+  initialDelaySeconds: 10
+  timeoutSeconds: 5
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: salamedicacao-front.apps.ham.org.br
+      paths:
+        - path: /
+          pathType: Prefix
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 70
+
+nodeSelector: {}
+
+affinity: {}
+
+tolerations: []
