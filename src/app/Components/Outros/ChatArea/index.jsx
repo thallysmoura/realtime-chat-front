@@ -193,18 +193,27 @@ export default function ChatArea({ dadosSala, dataUser, usuariosOnline, digitand
                                     </span>
                                 </div>
                                 <div className=" truncate max-w-[550px]">   
-                                {
-                                    dadosSala?.IntegrantesSala?.map((data, index) => {
-                                        const nome = data.nome === dataUser?.nome ? "você" : data.nome;
-                                        const isLast = index === dadosSala.IntegrantesSala.length - 1;
+                                    {(() => {
+                                        const integrantesFiltrados = dadosSala?.IntegrantesSala?.filter(
+                                            ({ tipo_integrante }) => tipo_integrante === 1 || tipo_integrante === 2
+                                        ) || [];
 
-                                        return (
-                                        <span key={index} className="text-[13px] font-medium text-gray-500">
-                                            {nome}{!isLast && ','}&nbsp;
-                                        </span>
-                                        );
-                                    })
-                                    }
+                                        return integrantesFiltrados.map(({ nome }, index) => {
+                                            const nomeExibido = nome === dataUser?.nome ? "você" : nome;
+                                            const isLast = index === integrantesFiltrados.length - 1;
+
+                                            return (
+                                                <span
+                                                    key={index}
+                                                    className="text-[13px] font-medium text-gray-500"
+                                                >
+                                                    {nomeExibido}
+                                                    {!isLast && ','}&nbsp;
+                                                </span>
+                                            );
+                                        });
+                                    })()}
+
 
                                 </div>
                             </section>

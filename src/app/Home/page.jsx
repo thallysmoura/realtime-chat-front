@@ -8,7 +8,7 @@ import { useState, useRef, useEffect } from 'react'
 
 export default function Home() {
 
-  const FOTO_PADRAO = 'https://res.cloudinary.com/dq1tse0wb/image/upload/v1754318471/perfil_0_kozz3d.png'
+  const FOTO_PADRAO = 'https://res.cloudinary.com/dq1tse0wb/image/upload/v1754924344/perfil_0_ijhdrb.png'
   const inputImagemRef = useRef(null)
 
 
@@ -29,6 +29,8 @@ export default function Home() {
   // novos
 
   const [usuario, setUsuario] = useState([])
+  const [MyRooms, setMyRooms] = useState([])
+  
 
   // novo: controla quando a checagem de sessão terminou
   const [sessionChecked, setSessionChecked] = useState(false)
@@ -74,7 +76,8 @@ export default function Home() {
       const res = await API.get("/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUsuario(res.data)
+      setUsuario(res.data?.info)
+      setMyRooms(res.data?.salas)
     } catch (error) {
       localStorage.removeItem("token")
       setUsuario([]) // mantém compatibilidade
@@ -336,6 +339,29 @@ export default function Home() {
               >
                 Sim
               </button>
+
+              {MyRooms.length > 0 && (
+                <div className="mt-10 text-left">
+                  Minhas Salas:
+                  <div className="grid gap-10 grid-cols-1 sm:grid-cols-2 md:grid-cols-3  bg-gray-100 shadow-xl p-5 rounded-md">
+                    {MyRooms?.map((i, index) => (
+                      <div
+                        key={index}
+                        className="flex w-[300px] truncate flex-col items-start text-xl font-medium text-black"
+                      >
+                        {i.nome}
+                        <a href={`/Room/${i.id}`}>
+                          <button className="w-full bg-gray-200 text-gray-700 px-1 text-sm py-2 px-3 rounded-xl hover:bg-gray-300 mt-2">
+                            Entrar
+                          </button>
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              )}
+            
 
               {/* Modal */}
               {querEntrar && (

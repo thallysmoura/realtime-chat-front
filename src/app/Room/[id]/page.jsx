@@ -63,7 +63,7 @@ export default function Page() {
           headers: { Authorization: `Bearer ${token}` },
         })
 
-        setUserData(res.data);
+        setUserData(res.data?.info);
         setUserDataLoaded(true);
 
       } catch (error) {

@@ -6,12 +6,19 @@ const InfoSala = ({ data, dataUser, RemoverIntegrante }) => {
 
     const { dadosSala } = data;
 
+ 
     // Estado local para integrantes
     const [integrantes, setIntegrantes] = useState(data.IntegrantesSala || []);
+    const [pendentes, setPendentes] = useState();
 
     // Atualiza o estado local caso a prop 'data.IntegrantesSala' mude
     useEffect(() => {
-        setIntegrantes(data.IntegrantesSala || []);
+        setIntegrantes(data.IntegrantesSala.filter(i => i.tipo_integrante === 2 || i.tipo_integrante === 1) || []);
+
+        setPendentes(
+            data.IntegrantesSala.filter(i => i.tipo_integrante === 4)
+          );
+
     }, [data.IntegrantesSala]);
 
     const isAdmin = dataUser?.id === dadosSala?.id_usuario;
@@ -90,12 +97,13 @@ const InfoSala = ({ data, dataUser, RemoverIntegrante }) => {
 
                 <section>
                     <div className='px-1 py-1 flex  text-xs font-medium  text-gray-600'>
-                        <span>{integrantes.length} integrante{integrantes.length > 1 && 's'}</span>
+                        <span>{integrantes.length} membro{integrantes.length > 1 && 's'}</span>
                     </div>
                 </section>
 
                 {
                     integrantes?.map((i, index) => {
+                        console.log(i)
                         const nome = i.nome === dataUser?.nome ? "Você" : i.nome;
                         const isMe = i.nome === dataUser?.nome ? true : false
                         const isRemovido = i.tipo_integrante === 3;
@@ -144,6 +152,62 @@ const InfoSala = ({ data, dataUser, RemoverIntegrante }) => {
                                         !isMe && (
                                             <button className="px-2 py-1 bg-[#b08e1e] hover:bg-[#816d2c] text-xs text-white rounded-full ">
                                                 Denunciar
+                                            </button>
+                                        )
+                                    }
+
+                                </section>
+                            </div>
+
+                        );
+                    })
+
+                }
+            </section>
+
+            <section id='listaPendentes' className='mt-4  p-2 flex flex-col gap-1 bg-gray-100 rounded w-full'>
+
+            <section>
+                <div className='px-1 py-1 flex  text-xd font-medium  text-[#c27f0b]'>
+                    <span>{pendentes?.length} pessoa{pendentes?.length > 1 && 's'} querem entrar na sala</span>
+                </div>
+            </section>
+            {
+                    pendentes?.map((i, index) => {
+                        console.log(i)
+                        const nome = i.nome === dataUser?.nome ? "Você" : i.nome;
+                        const isMe = i.nome === dataUser?.nome ? true : false
+                        const isRemovido = i.tipo_integrante === 3;
+
+                        return (
+                            <div key={index} className="flex shadow-md justify-between  w-full max-w-lg bg-white p-2  rounded-lg flex-wrap">
+
+                                {/* Informações do usuário */}
+                                <section className="flex  items-center gap-2 flex-1   truncate min-w-[200px]">
+                                    <img
+                                        src={i.photo}
+                                        alt="Avatar"
+                                        className="w-8 h-8 rounded-full object-cover bg-white"
+                                    />
+                                    <span className="text-xs font-semibold text-gray-700">
+                                        {nome}
+                                    </span>
+                                  
+                                </section>
+
+                                {/* Ações */}
+                                <section className="flex gap-2 justify-end items-center flex-1 min-w-[200px]">
+                                    {
+                                        (isAdmin) && (
+                                            <button onClick={() => handleRemoverIntegrante(i)} className="   px-2 py-1 bg-[#B73E4A] hover:bg-[#8d2e38] text-xs text-white rounded-full ">
+                                                Recusar
+                                            </button>
+                                        )
+                                    }
+                                    {
+                                        (isAdmin) && (
+                                            <button className="px-2 py-1 bg-[#55A181] hover:bg-[#39725a] text-xs text-white rounded-full ">
+                                                Aprovar
                                             </button>
                                         )
                                     }
