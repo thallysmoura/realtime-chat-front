@@ -296,10 +296,25 @@ export default function Page() {
     );
   }
 
+  async function RecusarSolicitacao(data) {
+    const socket = socketRef.current;
+    if (!socket) {
+      console.error("Socket não está conectado");
+      return;
+    }
+
+    socket.emit("RecusarSolicitacao",
+      { integranteData: data, sala: dadosSala?.dadosSala },
+      (resp) => {
+        console.log("Resposta do servidor:", resp);
+      }
+    );
+  }
+
 
   async function handleAbrirInfoSala() {
     setTitleModal('Dados da Sala')
-    setContentModal(<InfoSala data={dadosSala} dataUser={userData} RemoverIntegrante={RemoverIntegrante} AprovarSolicitacao={AprovarSolicitacao} />)
+    setContentModal(<InfoSala data={dadosSala} dataUser={userData} RemoverIntegrante={RemoverIntegrante} AprovarSolicitacao={AprovarSolicitacao} RecusarSolicitacao={RecusarSolicitacao} />)
     setShowModal(true)
   }
 

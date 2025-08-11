@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { format } from "date-fns";
 
 
-const InfoSala = ({ data, dataUser, RemoverIntegrante, AprovarSolicitacao }) => {
+const InfoSala = ({ data, dataUser, RemoverIntegrante, AprovarSolicitacao, RecusarSolicitacao }) => {
 
     const { dadosSala } = data;
 
@@ -35,6 +35,13 @@ const InfoSala = ({ data, dataUser, RemoverIntegrante, AprovarSolicitacao }) => 
         setPendentes((prev) => prev.filter(i => i.id !== integrante.id));
         setIntegrantes((prev) => [...prev, integrante]);
     };
+
+    const handleRecusarSolicitacao = (integrante) => {
+        RecusarSolicitacao(integrante);
+        setPendentes((prev) => prev.filter(i => i.id !== integrante.id));
+    };
+
+    
 
 
 
@@ -207,7 +214,7 @@ const InfoSala = ({ data, dataUser, RemoverIntegrante, AprovarSolicitacao }) => 
                                         <section className="flex  gap-2 justify-end items-center flex-1 min-w-[200px]">
                                             {
                                                 (isAdmin) && (
-                                                    <button className="   px-2 py-1 bg-[#B73E4A] font-medium hover:bg-[#8d2e38] text-xs text-white rounded-full ">
+                                                    <button onClick={()=>handleRecusarSolicitacao(i)} className="   px-2 py-1 bg-[#B73E4A] font-medium hover:bg-[#8d2e38] text-xs text-white rounded-full ">
                                                         <div className='flex gap-1 px-4'>
                                                             <div>
                                                                 <svg className="w-4 h-4 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width={24} height={24} fill="currentColor" viewBox="0 0 24 24">
