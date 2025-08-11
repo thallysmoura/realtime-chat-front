@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { format } from "date-fns";
 
 
-const InfoSala = ({ data, dataUser, RemoverIntegrante }) => {
+const InfoSala = ({ data, dataUser, RemoverIntegrante, AprovarSolicitacao }) => {
 
     const { dadosSala } = data;
 
@@ -30,8 +30,10 @@ const InfoSala = ({ data, dataUser, RemoverIntegrante }) => {
     };
 
 
-    const handleRecusarSolicitacao = (integrante) => {
+    const handleAprovarSolicitacao = (integrante) => {
+        AprovarSolicitacao(integrante);
         setPendentes((prev) => prev.filter(i => i.id !== integrante.id));
+        setIntegrantes((prev) => [...prev, integrante]);
     };
 
 
@@ -65,7 +67,7 @@ const InfoSala = ({ data, dataUser, RemoverIntegrante }) => {
 
             <section>
                 <div className='p-1 px-2 flex text-[13px] font-bold  text-gray-500'>
-                    <span>{integrantes.length} integrante{integrantes.length > 1 && 's'}</span>
+                    <span>Possui {integrantes.length} integrante{integrantes.length > 1 && 's'}</span>
                 </div>
             </section>
 
@@ -82,7 +84,7 @@ const InfoSala = ({ data, dataUser, RemoverIntegrante }) => {
 
                         <div className='flex justify-center'>
                             <input
-                                className='p-2 text-gray-500 cursor-pointer text-sm bg-gray-100  rounded-full w-[300px]'
+                                className='p-2 text-gray-500 shadow-md cursor-pointer text-sm bg-gray-50  rounded-full w-[300px]'
                                 type='text'
                                 readOnly
                                 value={dadosSala?.id}
@@ -202,10 +204,10 @@ const InfoSala = ({ data, dataUser, RemoverIntegrante }) => {
                                         </section>
         
                                         {/* Ações */}
-                                        <section className="flex gap-2 justify-end items-center flex-1 min-w-[200px]">
+                                        <section className="flex  gap-2 justify-end items-center flex-1 min-w-[200px]">
                                             {
                                                 (isAdmin) && (
-                                                    <button onClick={() => handleRecusarSolicitacao(i)} className="   px-2 py-1 bg-[#B73E4A] font-medium hover:bg-[#8d2e38] text-xs text-white rounded-full ">
+                                                    <button className="   px-2 py-1 bg-[#B73E4A] font-medium hover:bg-[#8d2e38] text-xs text-white rounded-full ">
                                                         <div className='flex gap-1 px-4'>
                                                             <div>
                                                                 <svg className="w-4 h-4 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width={24} height={24} fill="currentColor" viewBox="0 0 24 24">
@@ -222,7 +224,7 @@ const InfoSala = ({ data, dataUser, RemoverIntegrante }) => {
                                             }
                                             {
                                                 (isAdmin) && (
-                                                    <button className="px-2 py-1 bg-[#55A181] hover:bg-[#2b5543] text-xs font-medium text-white rounded-full ">
+                                                    <button onClick={()=>handleAprovarSolicitacao(i)} className="px-2 py-1 bg-[#55A181] hover:bg-[#2b5543] text-xs font-medium text-white rounded-full ">
                                                           <div className='flex gap-1 px-4'>
                                                             <div>
                                                                 <svg className="w-4 h-4 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width={24} height={24} fill="currentColor" viewBox="0 0 24 24">
@@ -263,7 +265,7 @@ const InfoSala = ({ data, dataUser, RemoverIntegrante }) => {
                             </svg>
                         </div>
                         <div className='flex text-sm font-medium  text-danger  '>
-                            <span>Sair da Sala</span>
+                            <span>Sair</span>
                         </div>
                     </div>
 

@@ -145,8 +145,10 @@ export default function Page() {
         setShowModal(true)
         setTimeout(() => {
           router.push('/')
-        }, 3000);
+        }, 2000);
       }
+
+  
     });
 
 
@@ -279,10 +281,25 @@ export default function Page() {
     );
   }
 
+  async function AprovarSolicitacao(data) {
+    const socket = socketRef.current;
+    if (!socket) {
+      console.error("Socket não está conectado");
+      return;
+    }
+
+    socket.emit("AprovarSolicitacao",
+      { integranteData: data, sala: dadosSala?.dadosSala },
+      (resp) => {
+        console.log("Resposta do servidor:", resp);
+      }
+    );
+  }
+
 
   async function handleAbrirInfoSala() {
     setTitleModal('Dados da Sala')
-    setContentModal(<InfoSala data={dadosSala} dataUser={userData} RemoverIntegrante={RemoverIntegrante} />)
+    setContentModal(<InfoSala data={dadosSala} dataUser={userData} RemoverIntegrante={RemoverIntegrante} AprovarSolicitacao={AprovarSolicitacao} />)
     setShowModal(true)
   }
 
