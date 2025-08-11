@@ -30,6 +30,12 @@ const InfoSala = ({ data, dataUser, RemoverIntegrante }) => {
     };
 
 
+    const handleRecusarSolicitacao = (integrante) => {
+        setPendentes((prev) => prev.filter(i => i.id !== integrante.id));
+    };
+
+
+
     return (
         <main className='flex items-center justify-center flex-col gap-1'>
             <section id='infoSala' className='flex flex-col gap-1 items-center'>
@@ -97,7 +103,7 @@ const InfoSala = ({ data, dataUser, RemoverIntegrante }) => {
 
                 <section>
                     <div className='px-1 py-1 flex  text-xs font-medium  text-gray-600'>
-                        <span>{integrantes.length} membro{integrantes.length > 1 && 's'}</span>
+                        <span>Integrantes</span>
                     </div>
                 </section>
 
@@ -130,7 +136,7 @@ const InfoSala = ({ data, dataUser, RemoverIntegrante }) => {
                                                     </svg>
                                                 </div>
                                                 <div className=''>
-                                                    Admin
+                                                    Dono
                                                 </div>
 
 
@@ -165,61 +171,85 @@ const InfoSala = ({ data, dataUser, RemoverIntegrante }) => {
                 }
             </section>
 
-            <section id='listaPendentes' className='mt-4  p-2 flex flex-col gap-1 bg-gray-100 rounded w-full'>
-
-            <section>
-                <div className='px-1 py-1 flex  text-xd font-medium  text-[#c27f0b]'>
-                    <span>{pendentes?.length} pessoa{pendentes?.length > 1 && 's'} querem entrar na sala</span>
-                </div>
-            </section>
             {
-                    pendentes?.map((i, index) => {
-                        console.log(i)
-                        const nome = i.nome === dataUser?.nome ? "Você" : i.nome;
-                        const isMe = i.nome === dataUser?.nome ? true : false
-                        const isRemovido = i.tipo_integrante === 3;
+                  ((isAdmin) && (pendentes?.length > 0) )&& (
+                    <section id='listaPendentes' className='mt-4  p-2 flex flex-col gap-1 bg-gray-100 rounded w-full'>
 
-                        return (
-                            <div key={index} className="flex shadow-md justify-between  w-full max-w-lg bg-white p-2  rounded-lg flex-wrap">
+                    <section>
+                        <div className='px-1 py-1 flex  text-xs font-medium  text-[#c27f0b] animate-pulse'>
+                            <span>Aguardando aprovação</span>
+                        </div>
+                    </section>
+                    {
+                            pendentes?.map((i, index) => {
+                   
+                                const nome =  i.nome;
+                       
+                                return (
+                                    <div key={index} className="flex shadow-md justify-between  w-full max-w-lg bg-white p-2  rounded-lg flex-wrap">
+        
+                                        {/* Informações do usuário */}
+                                        <section className="flex  items-center gap-2 flex-1   truncate min-w-[200px]">
+                                            <img
+                                                src={i.photo}
+                                                alt="Avatar"
+                                                className="w-8 h-8 rounded-full object-cover bg-white"
+                                            />
+                                            <span className="text-xs font-semibold text-gray-700">
+                                                {nome}
+                                            </span>
+                                          
+                                        </section>
+        
+                                        {/* Ações */}
+                                        <section className="flex gap-2 justify-end items-center flex-1 min-w-[200px]">
+                                            {
+                                                (isAdmin) && (
+                                                    <button onClick={() => handleRecusarSolicitacao(i)} className="   px-2 py-1 bg-[#B73E4A] font-medium hover:bg-[#8d2e38] text-xs text-white rounded-full ">
+                                                        <div className='flex gap-1 px-4'>
+                                                            <div>
+                                                                <svg className="w-4 h-4 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width={24} height={24} fill="currentColor" viewBox="0 0 24 24">
+                                                                    <path fillRule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm7.707-3.707a1 1 0 0 0-1.414 1.414L10.586 12l-2.293 2.293a1 1 0 1 0 1.414 1.414L12 13.414l2.293 2.293a1 1 0 0 0 1.414-1.414L13.414 12l2.293-2.293a1 1 0 0 0-1.414-1.414L12 10.586 9.707 8.293Z" clipRule="evenodd" />
+                                                                </svg>
+                                                            </div>
+                                                            <div>
+                                                                Recusar
+                                                            </div>
+                                                        </div>
+                                                        
+                                                    </button>
+                                                )
+                                            }
+                                            {
+                                                (isAdmin) && (
+                                                    <button className="px-2 py-1 bg-[#55A181] hover:bg-[#2b5543] text-xs font-medium text-white rounded-full ">
+                                                          <div className='flex gap-1 px-4'>
+                                                            <div>
+                                                                <svg className="w-4 h-4 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width={24} height={24} fill="currentColor" viewBox="0 0 24 24">
+                                                                    <path fillRule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm13.707-1.293a1 1 0 0 0-1.414-1.414L11 12.586l-1.793-1.793a1 1 0 0 0-1.414 1.414l2.5 2.5a1 1 0 0 0 1.414 0l4-4Z" clipRule="evenodd" />
+                                                                </svg>
+                                                            </div>
+                                                            <div>
+                                                                Aprovar
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                )
+                                            }
+        
+                                        </section>
+                                    </div>
+        
+                                );
+                            })
+        
+                        }
+                    </section>
 
-                                {/* Informações do usuário */}
-                                <section className="flex  items-center gap-2 flex-1   truncate min-w-[200px]">
-                                    <img
-                                        src={i.photo}
-                                        alt="Avatar"
-                                        className="w-8 h-8 rounded-full object-cover bg-white"
-                                    />
-                                    <span className="text-xs font-semibold text-gray-700">
-                                        {nome}
-                                    </span>
-                                  
-                                </section>
+                  )
+            }
 
-                                {/* Ações */}
-                                <section className="flex gap-2 justify-end items-center flex-1 min-w-[200px]">
-                                    {
-                                        (isAdmin) && (
-                                            <button onClick={() => handleRemoverIntegrante(i)} className="   px-2 py-1 bg-[#B73E4A] hover:bg-[#8d2e38] text-xs text-white rounded-full ">
-                                                Recusar
-                                            </button>
-                                        )
-                                    }
-                                    {
-                                        (isAdmin) && (
-                                            <button className="px-2 py-1 bg-[#55A181] hover:bg-[#39725a] text-xs text-white rounded-full ">
-                                                Aprovar
-                                            </button>
-                                        )
-                                    }
-
-                                </section>
-                            </div>
-
-                        );
-                    })
-
-                }
-            </section>
+           
 
             <section className='w-full mt-1'>
 

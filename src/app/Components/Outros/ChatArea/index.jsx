@@ -304,7 +304,7 @@ export default function ChatArea({ dadosSala, dataUser, usuariosOnline, digitand
 
                                     <div className="flex flex-wrap justify-between items-end gap-1">
                                         {/* Texto da mensagem */}
-                                        <div className="max-w-[200px] mr-1 break-words">
+                                        <div className="max-w-[250px] mr-1 break-words">
                                             {renderMensagem(msg.texto, msg.deletada)}
                                         </div>
 
