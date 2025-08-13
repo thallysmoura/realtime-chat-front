@@ -7,13 +7,15 @@ import { gerarHashSala } from '@utils/Utils'
 import API from 'app/Service/API'
 import { useRouter } from 'next/navigation'
 import { useState, useRef, useEffect, use } from 'react'
-
+import { io } from "socket.io-client"
 
 
 const audioPopUp = typeof Audio !== "undefined" ? new Audio("/popup.mp3") : null
 
 
 export default function Home() {
+
+  const socketRef = useRef(null)
 
   const FOTO_PADRAO = 'https://res.cloudinary.com/dq1tse0wb/image/upload/v1754924344/perfil_0_ijhdrb.png'
   const inputImagemRef = useRef(null)
@@ -36,6 +38,68 @@ export default function Home() {
   const [MyRooms, setMyRooms] = useState([])
   const [sessionChecked, setSessionChecked] = useState(false)
 
+
+  // ok
+  const checaSessao = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setSessionChecked(true)
+      return;
+    }
+    try {
+      const res = await API.get("/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUsuario(res.data?.info)
+      setMyRooms(res.data?.salas)
+    } catch (error) {
+      localStorage.removeItem("token")
+      setUsuario([]) // mantém compatibilidade
+    } finally {
+      // sempre sinaliza que a checagem terminou
+      setSessionChecked(true)
+    }
+  };
+  
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return; // não cria o socket sem token
+  
+    const socket = io(process.env.NEXT_PUBLIC_WEBSOCKET_URL, {
+      auth: { token },
+      transports: ["websocket"],
+      reconnectionAttempts: 5,
+      reconnectionDelay: 2000,
+    });
+  
+    socketRef.current = socket;
+  
+    socket.on("reconnect_attempt", () => {
+      socket.auth = { token: localStorage.getItem("token") };
+    });
+  
+    socket.on("connect_error", (err) => {
+      console.warn("Socket connect_error:", err?.message || err);
+      const msg = (err?.message || "").toLowerCase();
+      if (msg.includes("unauthorized") || msg.includes("token")) {
+        localStorage.removeItem("token");
+        router.push("/");
+      }
+    });
+  
+    socket.on("refresh", async (resposta) => {
+      await checaSessao()
+    });
+  
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.emit("sair");
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
+  }, []);
+  
 
 
   const converterParaBase64 = (file) =>
@@ -68,27 +132,6 @@ export default function Home() {
     (usuario.photo || usuario.nome)
   )
 
-  // ok
-  const checaSessao = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setSessionChecked(true)
-      return;
-    }
-    try {
-      const res = await API.get("/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsuario(res.data?.info)
-      setMyRooms(res.data?.salas)
-    } catch (error) {
-      localStorage.removeItem("token")
-      setUsuario([]) // mantém compatibilidade
-    } finally {
-      // sempre sinaliza que a checagem terminou
-      setSessionChecked(true)
-    }
-  };
 
   // ok
   const Entrar = async () => {
