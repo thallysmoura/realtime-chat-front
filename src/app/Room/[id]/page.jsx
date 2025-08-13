@@ -140,15 +140,29 @@ export default function Page() {
     socket.emit("entrar", { sala: id }, (resposta) => {
 
       if (resposta.error) {
-        setTitleModal('Atenção')
-        setContentModal(<p className="text-base ">{resposta.error}</p>)
-        setShowModal(true)
-        setTimeout(() => {
-          router.push('/')
-        }, 2000);
+        if(resposta.error === 'PENDENTE')
+        {
+          setCarregando(false)
+          setTitleModal('Aguardando...')
+          setContentModal(<p className="text-base ">{resposta.error}</p>)
+          setShowModal(true)
+         
+          return;
+        }else{
+          setCarregando(false)
+          setTitleModal('Atenção')
+          setContentModal(<p className="text-base ">{resposta.error}</p>)
+          setShowModal(true)
+          setTimeout(() => {
+            router.push('/')
+          }, 2000);
+          return;
+        }
+    
+     
       }
-
-  
+      
+    
     });
 
 
@@ -200,19 +214,10 @@ export default function Page() {
     // Monta payload incluindo replied_to (se existir)
     const payload = {
       mensagem: text,
-      sala: id
+      sala: id,
+      resposta: replyTo
     }
 
-    if (replyTo) {
-      // inclui dados úteis da mensagem respondida para backend ou clients
-      payload.replied_to = {
-        nome: replyTo.nome,
-        texto: replyTo.texto,
-        data_envio: replyTo.data_envio,
-        // se sua mensagem original tiver um id único, adicione aqui: id: replyTo._id || replyTo.id_mensagem
-        // não alterei nada nos objetos originais; apenas envio os campos existentes
-      }
-    }
 
     socketRef.current.emit("mensagem", payload)
 
@@ -320,7 +325,8 @@ export default function Page() {
 
   return (
     <>
-      <ChatArea
+  
+        <ChatArea
         dadosSala={dadosSala}
         dataUser={userData}
         usuariosOnline={usuariosOnline}
@@ -340,6 +346,7 @@ export default function Page() {
         setReplyTo={setReplyTo}
         clickInfoSala={handleAbrirInfoSala}
       /> 
+   
 
       <Modal isOpen={showModal} onClose={setShowModal} title={titleModal} existHeader headerColor='bg-gray-400' >
         {contentModal}

@@ -6,20 +6,36 @@ import { useEffect, useState, useRef } from "react"
 import IframeMessage from "../IframeMessage";
 import SendMessageIcon from "@component/SvgsIcons/SendMessageIcon";
 
-// @ método responsável em tratar como a mensagem deve aparecer
-/*
-function renderMensagem(texto) {
-    if (isUrl(texto.trim())) {
-        return (
-            <IframeMessage
-                texto={texto}
-            />
-        )
-    }
-    return <div>{texto}</div>
-}*/
-function renderMensagem(texto, deletada) {
-    if (deletada) {
+
+  
+
+export default function ChatArea({ dadosSala, dataUser, usuariosOnline, digitando, clickInfoSala, sair, mensagens, mensagensRef, mensagem, setMensagem, setMensagens, enviarMensagem, id, timeoutRef, socket, replyTo, setReplyTo }) {
+
+    
+function renderMensagem(msg) {
+
+    const { texto, deletada, resposta_id} = msg;
+    const nomeExibido = msg.resposta_nome === dataUser?.nome ? "Você" : msg.resposta_nome;
+
+    if (resposta_id !== null && msg.tipo == 1) {
+        return <section className="flex gap-1 flex-col">
+           <div className="bg-[#f1ffe7] text-sm border-l-4 border-l-[#b4aba2] text-gray-800 p-2 flex flex-col rounded-lg">
+
+                <div className="font-medium">
+                    { nomeExibido }
+                </div>
+                <div>
+                    {msg.resposta_texto}
+                </div>
+            
+            </div>
+            <div>
+                {msg.texto}
+            </div>
+        </section>
+     }
+
+     if (deletada) {
         return <section className="flex gap-1 items-center">
             <div>
                 <svg className="w-4 h-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width={24} height={24} fill="none" viewBox="0 0 24 24">
@@ -36,17 +52,15 @@ function renderMensagem(texto, deletada) {
         </section>
      }
   
-    if (isUrl(texto.trim())) {
+     if (isUrl(texto.trim())) {
       return <IframeMessage texto={texto} />;
     }
+
+        return <div>{texto}</div>;
+    
   
-    return <div>{texto}</div>;
+   
   }
-  
-
-
-export default function ChatArea({ dadosSala, dataUser, usuariosOnline, digitando, clickInfoSala, sair, mensagens, mensagensRef, mensagem, setMensagem, setMensagens, enviarMensagem, id, timeoutRef, socket, replyTo, setReplyTo }) {
-
    
     const [modalAberta, setModalAberta] = useState(false);
 
@@ -135,6 +149,7 @@ export default function ChatArea({ dadosSala, dataUser, usuariosOnline, digitand
     function handleResponder(msg) {
         setReplyTo(msg)
         setOpenMenuIndex(null)
+        document.getElementById("campoMensagem").focus()
     }
 
     // cancelar resposta
@@ -246,7 +261,7 @@ export default function ChatArea({ dadosSala, dataUser, usuariosOnline, digitand
                 {/* Mensagens */}
                 <div ref={mensagensRef} className="flex-1  overflow-y-auto bg-[#e5ddd5] p-3 space-y-2 pb-[140px] mt-[65px]" >
                     {mensagens.map((msg, i) => {
-      
+                     
                         const isMinhaMensagem = msg.id === dataUser?.id
                         const wrapperRefSetter = (el) => { messageRefs.current[i] = el }
 
@@ -294,18 +309,12 @@ export default function ChatArea({ dadosSala, dataUser, usuariosOnline, digitand
                                         </div>
                                     )}
 
-                                    {/* Se a mensagem original já for uma resposta, renderize o bloco citado */}
-                                    {msg.replied_to && (
-                                        <div className="mb-2 p-2 bg-gray-100 rounded text-xs text-gray-700 border-l-2 border-gray-300">
-                                            <div className="font-semibold text-[11px] truncate">{msg.replied_to.nome}</div>
-                                            <div className="text-[11px] truncate">{msg.replied_to.texto}</div>
-                                        </div>
-                                    )}
+                     
 
                                     <div className="flex flex-wrap justify-between items-end gap-1">
                                         {/* Texto da mensagem */}
                                         <div className="max-w-[250px] mr-1 break-words">
-                                            {renderMensagem(msg.texto, msg.deletada)}
+                                            {renderMensagem(msg)}
                                         </div>
 
                                         {/* Hora alinhada à direita */}
@@ -411,6 +420,7 @@ export default function ChatArea({ dadosSala, dataUser, usuariosOnline, digitand
                             type="text"
                             className="flex-1 text-base p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                             value={mensagem}
+                            id="campoMensagem"
                             onChange={handleInputChange}
                             onKeyDown={(e) => { if (e.key === "Enter") enviarMensagem() }}
                             placeholder="Digite uma mensagem"

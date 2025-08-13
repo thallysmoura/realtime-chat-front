@@ -276,6 +276,7 @@ export default function Home() {
             value={nome}
             onChange={(e) => setNome(e.target.value)}
           />
+           
           {erros.nome && <small className="text-red-500">{erros.nome}</small>}
         </div>
 
@@ -292,8 +293,10 @@ export default function Home() {
                 onChange={(e) => setSala(e.target.value)}
                 disabled={querEntrar}
               />
+              
               {!querEntrar && erros.sala && <small className="text-red-500">{erros.sala}</small>}
             </div>
+            
           )
         }
 
