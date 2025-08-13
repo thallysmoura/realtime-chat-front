@@ -17,6 +17,25 @@ export default function Home() {
 
   const socketRef = useRef(null)
 
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+
+  
+  // Fecha o dropdown ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const FOTO_PADRAO = 'https://res.cloudinary.com/dq1tse0wb/image/upload/v1754924344/perfil_0_ijhdrb.png'
   const inputImagemRef = useRef(null)
 
@@ -60,24 +79,24 @@ export default function Home() {
       setSessionChecked(true)
     }
   };
-  
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return; // não cria o socket sem token
-  
+
     const socket = io(process.env.NEXT_PUBLIC_WEBSOCKET_URL, {
       auth: { token },
       transports: ["websocket"],
       reconnectionAttempts: 5,
       reconnectionDelay: 2000,
     });
-  
+
     socketRef.current = socket;
-  
+
     socket.on("reconnect_attempt", () => {
       socket.auth = { token: localStorage.getItem("token") };
     });
-  
+
     socket.on("connect_error", (err) => {
       console.warn("Socket connect_error:", err?.message || err);
       const msg = (err?.message || "").toLowerCase();
@@ -86,11 +105,11 @@ export default function Home() {
         router.push("/");
       }
     });
-  
+
     socket.on("refresh", async (resposta) => {
       await checaSessao()
     });
-  
+
     return () => {
       if (socketRef.current) {
         socketRef.current.emit("sair");
@@ -99,7 +118,7 @@ export default function Home() {
       }
     };
   }, []);
-  
+
 
 
   const converterParaBase64 = (file) =>
@@ -227,8 +246,8 @@ export default function Home() {
   }
 
 
-  async function createRoomModal(){
-  
+  async function createRoomModal() {
+
     setTitleModal('Nova Sala')
     setContentModal(<CreateRoom />)
     setShowModal(true)
@@ -236,7 +255,7 @@ export default function Home() {
 
   }
 
-  async function fecharModal(){
+  async function fecharModal() {
     setShowModal(false)
 
   }
@@ -259,220 +278,248 @@ export default function Home() {
 
   return (
     <>
-    <div className='bg-gray-100'>
+      <div className='bg-gray-100'>
 
-      {
-        isAuthenticated && (
-          <>
-          <header className='flex justify-between px-4 py-2 items-center'>
-            <div className={`animate-slideIn p-[4px] rounded-3xl bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500 ${isAuthenticated ? 'cursor-default' : 'cursor-pointer'} `}>
-              <img
-                src={isAuthenticated ? (usuario?.photo ?? foto) : foto}
-                alt="Avatar"
-                className="w-8 h-8 rounded-full object-cover bg-white"
-              />
-            </div>
-            <div className='animate-slideIn' onClick={createRoomModal}>
-              <div id='create-room' className="group inline-block">
-                <svg
-                  className="w-10 h-10 text-[#405DA1] focus:w-8 focus:h-8 rounded-full cursor-pointer transition-transform duration-500 group-hover:rotate-[360deg]"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 
+        {
+          isAuthenticated && (
+            <>
+              <header className='flex justify-between px-4 py-2 items-center'>
+                <div onClick={() => setDropdownOpen(prev => !prev)} ref={dropdownRef} className={` relative animate-slideIn p-[4px] rounded-3xl bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500 ${isAuthenticated ? 'cursor-default' : 'cursor-pointer'} `}>
+                  <img
+                    src={isAuthenticated ? (usuario?.photo ?? foto) : foto}
+                    alt="Avatar"
+                    className="w-8 h-8 rounded-full object-cover bg-white"
+                  />
+                  {/* Dropdown */}
+                  {dropdownOpen && (
+                    <div className="absolute text-sm mt-2 w-40 bg-white rounded-lg shadow-lg left-1 z-50">
+                      <button
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      >
+                        Perfil
+                      </button>
+                      <button
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                        onClick={logout}
+                      >
+                        Sair
+                      </button>
+                    </div>
+                  )}
+                </div>
+               
+                <div className='animate-slideIn' onClick={createRoomModal}>
+                  <div id='create-room' className="group inline-block">
+                    <svg
+                      className="w-10 h-10 text-[#405DA1] focus:w-8 focus:h-8 rounded-full cursor-pointer transition-transform duration-500 group-hover:rotate-[360deg]"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 
                     10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 
                     0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 
                     0-2H13V7.757Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-
-            </div>
-          </header>
-       
-          </>
-        )
-      }
-     
-
-
-    <div className="min-h-screen rounded-t-3xl flex items-center justify-center bg-white shadow-md px-4 transition-opacity duration-400 ease-in">
-    
-      <div className="w-full max-w-[350px] flex flex-col gap-4 opacity-100">
-
-      <section>
-            <span className=' text-[30px] font-extrabold text-gray-700'>Salas</span>
-          </section>
-       
-        {/* Avatar */}
-        <div className="flex flex-col items-center gap-2">
-          <div
-            className={`p-[5px] rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500 ${isAuthenticated ? 'cursor-default' : 'cursor-pointer'} `}
-            onClick={() => { !isAuthenticated && inputImagemRef.current?.click() }}
-          >
-            <img
-              src={isAuthenticated ? (usuario?.photo ?? foto) : foto}
-              alt="Avatar"
-              className="w-24 h-24 rounded-full object-cover bg-white"
-            />
-          </div>
-
-          <input
-            type="file"
-            accept="image/*"
-            hidden={isAuthenticated}
-            ref={inputImagemRef}
-            onChange={handleSelecionarImagem}
-            className="hidden"
-          />
-          <small hidden={isAuthenticated} className="text-gray-500 cursor-pointer hover:underline" onClick={() => inputImagemRef.current?.click()}>
-            Alterar foto de perfil
-          </small>
-        </div>
-
-        {/* Nome */}
-        <div className="flex flex-col gap-1">
-          <small hidden={isAuthenticated} className="text-gray-600">Pra começar, informe seu nome abaixo:</small>
-          {
-            isAuthenticated &&
-            (
-              <>
-                <small onClick={logout} className=" cursor-pointer text-[19px] text-center text-primary">Bem-vindo, {usuario?.nome}!</small>
-                <small onClick={logout} className=" cursor-pointer text-base text-center text-red-500">Sair</small>
-
-              </>
-
-
-            )
-          }
-          <input
-            type="text"
-            autoFocus
-        
-            hidden={isAuthenticated}
-            placeholder="Ex: João"
-            className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-          />
-           
-          {erros.nome && <small className="text-red-500">{erros.nome}</small>}
-        </div>
-
-
-
-        {/* Botão Criar */}
-        <div>
-          {
-            !isAuthenticated &&
-              (
-                <button
-                  onClick={Entrar}
-                  disabled={carregando || querEntrar}
-                  className="w-full bg-[#405DA1] text-white px-4 py-2 rounded-md hover:bg-[#31477a] disabled:opacity-50 disabled:cursor-wait"
-                >
-                  {carregando ? 'Aguarde...' : 'Entrar'}
-                </button>
-              )
-          }
-
-
-        </div>
-
-        {/* Entrar em sala existente */}
-        {
-          isAuthenticated && (
-            <div className="mt-4 text-center text-gray-700">
-              <p>Quer ingressar em uma sala existente?</p>
-              <button
-                onClick={() => {
-                  setQuerEntrar(true)
-                  setErros({ nome: '', sala: '', codigo: '', salaInexistente: '' })
-                }}
-                className="mt-2 px-4 py-2 bg-[#17B8A6] text-white rounded-xl hover:bg-[#118477]"
-              >
-                Sim
-              </button>
-
-              {MyRooms.length > 0 && (
-                <div className="mt-10 text-left">
-                  Minhas Salas:
-                  <div className="grid gap-10 grid-cols-1 sm:grid-cols-2 md:grid-cols-3  bg-gray-100 shadow-xl p-5 rounded-md">
-                    {MyRooms?.map((i, index) => (
-                      <div
-                        key={index}
-                        className="flex w-[300px] truncate flex-col items-start text-xl font-medium text-black"
-                      >
-                        {i.nome}
-                        <a href={`/Room/${i.id}`}>
-                          <button className="w-full bg-gray-200 text-gray-700 px-1 text-sm py-2 px-3 rounded-xl hover:bg-gray-300 mt-2">
-                            Entrar
-                          </button>
-                        </a>
-                      </div>
-                    ))}
+                        clipRule="evenodd"
+                      />
+                    </svg>
                   </div>
+
                 </div>
+              </header>
 
-              )}
-            
-
-              {/* Modal */}
-              {querEntrar && (
-                <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-                
-                  <div className="bg-white p-6 rounded-xl w-full max-w-sm">
-                    
-                    <h2 className="text-2xl font-semibold mb-4 animate-slideIn">Insira o código da sala</h2>
-
-                    <input
-                      type="text"
-                      placeholder="Código da sala"
-                      className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-1"
-                      value={codigoSalaExistente}
-                      onChange={(e) => {
-                        setCodigoSalaExistente(e.target.value)
-                        setErros((prev) => ({ ...prev, salaInexistente: '' }))
-                      }}
-                    />
-                    {erros.codigo && <small className="text-red-500">{erros.codigo}</small>}
-                    {erros.salaInexistente && <small className="text-red-500">{erros.salaInexistente}</small>}
-
-                    <div className="flex justify-end gap-2 mt-4">
-                      <button
-                        onClick={() => {
-                          setQuerEntrar(false)
-                          setCodigoSalaExistente('')
-                          setErros({ nome: '', sala: '', codigo: '', salaInexistente: '' })
-                        }}
-                        className="w-full bg-gray-200 text-gray-700 px-1 text-sm py-2 rounded-xl hover:bg-gray-300"
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        onClick={entrarSalaExistente}
-                        disabled={carregandoSalaExistente}
-                        className="w-full bg-[#405DA1]  text-white px-4 py-2 text-sm rounded-xl hover:bg-[#31477a] disabled:opacity-50 disabled:cursor-wait"
-                      >
-                        {carregandoSalaExistente ? 'Entrando...' : 'Entrar'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            </>
           )
         }
 
+
+
+        <div className="mt-4 pt-5 rounded-t-3xl flex items-center justify-center bg-white shadow-md px-4 transition-opacity duration-400 ease-in">
+
+          <div className="w-full max-w-[350px] flex flex-col gap-4 opacity-100">
+
+            {
+              isAuthenticated && (
+                <section>
+                  <span className=' text-[30px] font-extrabold text-gray-700'>Salas</span>
+                </section>
+              )
+            }
+
+
+            {
+              !isAuthenticated && (
+                <>
+                  <div className="flex flex-col items-center gap-2">
+                    <div
+                      className={`p-[5px] rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500 ${isAuthenticated ? 'cursor-default' : 'cursor-pointer'} `}
+                      onClick={() => { !isAuthenticated && inputImagemRef.current?.click() }}
+                    >
+                      <img
+                        src={isAuthenticated ? (usuario?.photo ?? foto) : foto}
+                        alt="Avatar"
+                        className="w-24 h-24 rounded-full object-cover bg-white"
+                      />
+                    </div>
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden={isAuthenticated}
+                      ref={inputImagemRef}
+                      onChange={handleSelecionarImagem}
+                      className="hidden"
+                    />
+                    <small hidden={isAuthenticated} className="text-gray-500 cursor-pointer hover:underline" onClick={() => inputImagemRef.current?.click()}>
+                      Alterar foto de perfil
+                    </small>
+                  </div>
+
+
+                  <div className="flex flex-col gap-1">
+                    <small hidden={isAuthenticated} className="text-gray-600">Pra começar, informe seu nome abaixo:</small>
+                    {
+                      isAuthenticated &&
+                      (
+                        <>
+                          <small onClick={logout} className=" cursor-pointer text-[19px] text-center text-primary">Bem-vindo, {usuario?.nome}!</small>
+                          <small onClick={logout} className=" cursor-pointer text-base text-center text-red-500">Sair</small>
+
+                        </>
+
+
+                      )
+                    }
+                    <input
+                      type="text"
+                      autoFocus
+                      hidden={isAuthenticated}
+                      placeholder="Ex: João"
+                      className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={nome}
+                      onChange={(e) => setNome(e.target.value)}
+                    />
+
+                    {erros.nome && <small className="text-red-500">{erros.nome}</small>}
+                  </div>
+                </>
+
+              )
+            }
+
+
+
+
+            {/* Botão Criar */}
+            <div>
+              {
+                !isAuthenticated &&
+                (
+                  <button
+                    onClick={Entrar}
+                    disabled={carregando || querEntrar}
+                    className="w-full bg-[#405DA1] text-white px-4 py-2 rounded-md hover:bg-[#31477a] disabled:opacity-50 disabled:cursor-wait"
+                  >
+                    {carregando ? 'Aguarde...' : 'Entrar'}
+                  </button>
+                )
+              }
+
+
+            </div>
+
+            {/* Entrar em sala existente */}
+            {
+              isAuthenticated && (
+                <div className="mt-4 text-center text-gray-700">
+                  <p>Quer ingressar em uma sala existente?</p>
+                  <button
+                    onClick={() => {
+                      setQuerEntrar(true)
+                      setErros({ nome: '', sala: '', codigo: '', salaInexistente: '' })
+                    }}
+                    className="mt-2 px-4 py-2 bg-[#17B8A6] text-white rounded-xl hover:bg-[#118477]"
+                  >
+                    Sim
+                  </button>
+
+                  {MyRooms.length > 0 && (
+                    <div className="mt-10 text-left">
+                      Recentes
+                      <div className="grid gap-10 grid-cols-1 sm:grid-cols-2 md:grid-cols-3  bg-gray-100 shadow-xl p-5 rounded-md">
+                        {MyRooms?.map((i, index) => (
+                          <div
+                            key={index}
+                            className="flex w-[300px] truncate flex-col items-start text-xl font-medium text-black  animate-slideIn "
+                          >
+                            {i.nome}
+                            <a href={`/Room/${i.id}`}>
+                              <button className="w-full bg-primary text-white text-sm py-2 px-3 rounded-xl hover:bg-gray-300 mt-2">
+                                Entrar
+                              </button>
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                  )}
+
+
+                  {/* Modal */}
+                  {querEntrar && (
+                    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+
+                      <div className="bg-white p-6 rounded-xl w-full max-w-sm">
+
+                        <h2 className="text-2xl font-semibold mb-4 animate-slideIn">Insira o código da sala</h2>
+
+                        <input
+                          type="text"
+                          placeholder="Código da sala"
+                          className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-1"
+                          value={codigoSalaExistente}
+                          onChange={(e) => {
+                            setCodigoSalaExistente(e.target.value)
+                            setErros((prev) => ({ ...prev, salaInexistente: '' }))
+                          }}
+                        />
+                        {erros.codigo && <small className="text-red-500">{erros.codigo}</small>}
+                        {erros.salaInexistente && <small className="text-red-500">{erros.salaInexistente}</small>}
+
+                        <div className="flex justify-end gap-2 mt-4">
+                          <button
+                            onClick={() => {
+                              setQuerEntrar(false)
+                              setCodigoSalaExistente('')
+                              setErros({ nome: '', sala: '', codigo: '', salaInexistente: '' })
+                            }}
+                            className="w-full bg-gray-200 text-gray-700 px-1 text-sm py-2 rounded-xl hover:bg-gray-300"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            onClick={entrarSalaExistente}
+                            disabled={carregandoSalaExistente}
+                            className="w-full bg-[#405DA1]  text-white px-4 py-2 text-sm rounded-xl hover:bg-[#31477a] disabled:opacity-50 disabled:cursor-wait"
+                          >
+                            {carregandoSalaExistente ? 'Entrando...' : 'Entrar'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            }
+
+          </div>
+        </div>
       </div>
-    </div>
-    </div>
-    
+
       {
         showModal && (
           <Modal isOpen={showModal} onClose={fecharModal} title={titleModal} existHeader={true} headerColor='bg-[#405DA1]' >
@@ -480,7 +527,7 @@ export default function Home() {
           </Modal>
         )
       }
-   
+
 
     </>
   )
