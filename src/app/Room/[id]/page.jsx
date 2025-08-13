@@ -85,15 +85,38 @@ export default function Page() {
     return () => clearInterval(intervalo)
   }, [])
 
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().then((permission) => {
+        console.log("Permissão de notificação:", permission);
+      });
+    }
+  }, []);
 
-  async function notification(novaMensagem) {
-    if (novaMensagem.id_sala === id && novaMensagem.id !== userData?.id) {
-      audioPop?.play()
-      if (document.visibilityState !== "visible") {
-        setNotificacoes((prev) => prev + 1)
-      }
+
+async function notification(novaMensagem) {
+  console.log(novaMensagem)
+  if (novaMensagem.id_sala === id && novaMensagem.id !== userData?.id) {
+    audioPop?.play();
+
+   
+
+    // Enviar notification push
+    if ("Notification" in window && Notification.permission === "granted") {
+       // Contador de notificações no título
+    if (document.visibilityState !== "visible") {
+      setNotificacoes((prev) => prev + 1);
+    }
+
+      new Notification(`${novaMensagem.nome} em `, {
+        body: novaMensagem.texto,
+        icon: novaMensagem.photo, // ícone da sua aplicação
+        tag: novaMensagem.texto, // evita duplicar notificações da mesma mensagem
+      });
     }
   }
+}
+
 
   function onRemovido(data) {
     setTitleModal('Atenção')
