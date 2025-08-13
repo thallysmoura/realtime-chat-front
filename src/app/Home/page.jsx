@@ -1,10 +1,17 @@
 'use client'
 
+import CreateRoom from '@component/Contents/Modal/CreateRoom'
 import IconLoadingBar from '@component/SvgsIcons/IconLoadingBar'
+import Modal from '@component/ap'
 import { gerarHashSala } from '@utils/Utils'
 import API from 'app/Service/API'
 import { useRouter } from 'next/navigation'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, use } from 'react'
+
+
+
+const audioPopUp = typeof Audio !== "undefined" ? new Audio("/popup.mp3") : null
+
 
 export default function Home() {
 
@@ -15,7 +22,6 @@ export default function Home() {
   const router = useRouter()
 
   const [nome, setNome] = useState('')
-  const [sala, setSala] = useState('')
   const [foto, setFoto] = useState(FOTO_PADRAO)
   const [arquivoImagem, setArquivoImagem] = useState(null)
   const [carregando, setCarregando] = useState(false)
@@ -23,17 +29,14 @@ export default function Home() {
   const [codigoSalaExistente, setCodigoSalaExistente] = useState('')
   const [carregandoSalaExistente, setCarregandoSalaExistente] = useState(false)
   const [erros, setErros] = useState({ nome: '', sala: '', codigo: '', salaInexistente: '' })
-
-
-
-  // novos
-
+  const [showModal, setShowModal] = useState(false)
+  const [titleModal, setTitleModal] = useState('')
+  const [contentModal, setContentModal] = useState(null)
   const [usuario, setUsuario] = useState([])
   const [MyRooms, setMyRooms] = useState([])
-  
-
-  // novo: controla quando a checagem de sessão terminou
   const [sessionChecked, setSessionChecked] = useState(false)
+
+
 
   const converterParaBase64 = (file) =>
     new Promise((resolve, reject) => {
@@ -180,29 +183,20 @@ export default function Home() {
     }
   }
 
-  async function handleCreateRoom() {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    if (!sala.trim()) return;
 
-    const hashSala = await gerarHashSala(sala);
+  async function createRoomModal(){
+    audioPopUp?.play()
+    setTitleModal('Nova Sala')
+    setContentModal(<CreateRoom />)
+    setShowModal(true)
 
-    try {
-      const req = await API.post(
-        "/create-room",
-        { salaId: hashSala, nomeSala: sala },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (req.data) {
-        router.push(`/Room/${req.data.room}`)
-      }
-    } catch (error) {
-      console.error("Erro ao criar sala:", error);
-    }
   }
+
+  async function fecharModal(){
+    setShowModal(false)
+
+  }
+
 
 
   // mostra loading overlay enquanto checamos a sessão inicial
@@ -220,10 +214,56 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 transition-opacity duration-400 ease-in">
+    <>
+    <div className='bg-gray-100'>
+
+      {
+        isAuthenticated && (
+          <>
+          <header className='flex justify-between px-4 py-2 items-center'>
+            <div className={`animate-slideIn p-[4px] rounded-3xl bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500 ${isAuthenticated ? 'cursor-default' : 'cursor-pointer'} `}>
+              <img
+                src={isAuthenticated ? (usuario?.photo ?? foto) : foto}
+                alt="Avatar"
+                className="w-8 h-8 rounded-full object-cover bg-white"
+              />
+            </div>
+            <div className='animate-slideIn' onClick={createRoomModal}>
+              <div id='create-room' className="group inline-block">
+                <svg
+                  className="w-10 h-10 text-[#405DA1] focus:w-8 focus:h-8 rounded-full cursor-pointer transition-transform duration-500 group-hover:rotate-[360deg]"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 
+                    10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 
+                    0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 
+                    0-2H13V7.757Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+
+            </div>
+          </header>
+       
+          </>
+        )
+      }
+     
+
+
+    <div className="min-h-screen rounded-t-3xl flex items-center justify-center bg-white shadow-md px-4 transition-opacity duration-400 ease-in">
+    
       <div className="w-full max-w-[350px] flex flex-col gap-4 opacity-100">
 
-      
+      <section>
+            <span className=' text-[30px] font-extrabold text-gray-700'>Salas</span>
+          </section>
        
         {/* Avatar */}
         <div className="flex flex-col items-center gap-2">
@@ -280,40 +320,12 @@ export default function Home() {
           {erros.nome && <small className="text-red-500">{erros.nome}</small>}
         </div>
 
-        {/* Nome da sala */}
-        {
-          isAuthenticated && (
-            <div className="flex flex-col gap-1">
-              <small className="text-gray-600">Insira um nome para sua sala:</small>
-              <input
-                type="text"
-                placeholder="Ex: Sala de Jogos"
-                className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={sala}
-                onChange={(e) => setSala(e.target.value)}
-                disabled={querEntrar}
-              />
-              
-              {!querEntrar && erros.sala && <small className="text-red-500">{erros.sala}</small>}
-            </div>
-            
-          )
-        }
 
 
         {/* Botão Criar */}
         <div>
           {
-            isAuthenticated ?
-              (
-                <button
-                  onClick={handleCreateRoom}
-                  className="w-full bg-[#405DA1] text-white px-4 py-2 rounded-md hover:bg-[#31477a] disabled:opacity-50 disabled:cursor-wait"
-                >
-                  {carregando ? 'Aguarde...' : 'Criar Sala'}
-                </button>
-              )
-              :
+            !isAuthenticated &&
               (
                 <button
                   onClick={Entrar}
@@ -415,5 +427,17 @@ export default function Home() {
 
       </div>
     </div>
+    </div>
+    
+      {
+        showModal && (
+          <Modal isOpen={showModal} onClose={fecharModal} title={titleModal} existHeader={true} headerColor='bg-[#405DA1]' >
+            {contentModal}
+          </Modal>
+        )
+      }
+   
+
+    </>
   )
 }

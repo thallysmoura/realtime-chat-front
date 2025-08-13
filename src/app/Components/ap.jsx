@@ -13,10 +13,10 @@ const Modal = ({ isOpen, onClose, existHeader = false,title, headerColor, classN
 
   return (
     <div id="modal-overlay" className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90" onClick={handleOverlayClick}>
-      <div className={`bg-white rounded-2xl ${className} animate-slideIn  shadow-lg w-11/12 max-w-lg relative`}>
+      <div className={`bg-white  ${className} animate-slideIn  shadow-lg w-11/12 max-w-lg relative`}>
         {
           existHeader ? 
-            <div className={`p-2 rounded-t-2xl ${headerColor}`}>
+            <div className={`p-2  ${headerColor}`}>
               <div className="flex justify-between items-center">
                 <div className="ml-3 text-white">{title}</div>
                   <div className='flex absolute right-[-5px] top-[-9px]'>
