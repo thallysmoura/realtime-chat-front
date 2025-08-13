@@ -185,10 +185,11 @@ export default function Home() {
 
 
   async function createRoomModal(){
-    audioPopUp?.play()
+  
     setTitleModal('Nova Sala')
     setContentModal(<CreateRoom />)
     setShowModal(true)
+    audioPopUp?.play()
 
   }
 

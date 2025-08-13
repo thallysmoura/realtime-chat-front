@@ -32,8 +32,11 @@ const CreateRoom = () => {
             );
 
             if (req.data) {
-                setLoading(false)
-                router.push(`/Room/${req.data.room}`)
+                setTimeout(() => {
+                    setLoading(false)
+                    router.push(`/Room/${req.data.room}`)
+                }, 2000);
+           
             }
         } catch (error) {
             console.error("Erro ao criar sala:", error);
@@ -62,7 +65,7 @@ const CreateRoom = () => {
                     <button
                         onClick={handleCreateRoom}
                         disabled={loading || !nomeSala.trim()}
-                        className="w-full bg-[#405DA1] text-white px-4 py-2 rounded-md hover:bg-[#31477a] disabled:opacity-30 disabled:cursor-not-allowed"
+                        className={`w-full bg-[#405DA1] text-white px-4 py-2 rounded-md hover:bg-[#31477a] disabled:opacity-30 disabled:cursor-not-allowed ${loading && 'animate-pulse'}`}
                     >
 
                         {loading ? 'Criando...' : 'Criar Sala'}

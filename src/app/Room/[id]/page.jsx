@@ -265,7 +265,7 @@ export default function Page() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
         <IconLoadingBar />
-        <p className="mt-4 text-gray-600 text-[20px] animate-pulse">{mensagemAtual}</p>
+        <p className="mt-4 text-gray-700 text-[30px] animate-pulse">{mensagemAtual}</p>
       </div>
     )
   }

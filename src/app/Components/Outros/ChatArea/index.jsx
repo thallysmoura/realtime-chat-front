@@ -14,10 +14,11 @@ export default function ChatArea({ dadosSala, dataUser, usuariosOnline, digitand
     
 function renderMensagem(msg) {
 
+    console.log(msg)
     const { texto, deletada, resposta_id} = msg;
     const nomeExibido = msg.resposta_nome === dataUser?.nome ? "Você" : msg.resposta_nome;
 
-    if (resposta_id !== null ) {
+    if (resposta_id !== null && msg.tipo !== 0 ) {
         return <section className="flex gap-1 flex-col">
            <div className="bg-[#f1ffe7] text-sm border-l-4 border-l-[#b4aba2] text-gray-800 p-2 flex flex-col rounded-lg">
 
