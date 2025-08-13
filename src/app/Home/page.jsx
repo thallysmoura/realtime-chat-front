@@ -292,7 +292,7 @@ export default function Home() {
                   />
                   {/* Dropdown */}
                   {dropdownOpen && (
-                    <div className="absolute text-sm mt-2 w-40 bg-white rounded-lg shadow-lg left-1 z-50">
+                    <div className="absolute text-sm text-gray-800 mt-2 w-40 bg-white rounded-lg shadow-lg left-1 z-50">
                       <button
                         className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                       >
@@ -337,7 +337,7 @@ export default function Home() {
 
 
 
-        <div className="mt-4 pt-5 rounded-t-3xl flex items-center justify-center bg-white shadow-md px-4 transition-opacity duration-400 ease-in">
+        <div className="mt-4  pt-5 rounded-t-3xl flex items-center justify-center bg-white shadow-md px-4 transition-opacity duration-400 ease-in">
 
           <div className="w-full max-w-[350px] flex flex-col gap-4 opacity-100">
 
