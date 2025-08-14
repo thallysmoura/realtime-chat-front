@@ -264,7 +264,7 @@ async function notification(novaMensagem) {
       socketRef.current.disconnect()
       socketRef.current = null
     }
-    router.push("/")
+    router.push("/Home")
   }
 
   // título com notificações
