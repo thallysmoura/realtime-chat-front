@@ -8,9 +8,11 @@ import Button2 from "@component/Button2";
 import Modal from "@component/ap";
 import Welcome from "@component/SvgsIcons/WelcomeIcon";
 import WelcomeIcon from "@component/SvgsIcons/WelcomeIcon";
+import { useRouter } from 'next/navigation'
 
 const Join = () => {
 
+  const router = useRouter()
 
   const FOTO_PADRAO = 'https://res.cloudinary.com/dq1tse0wb/image/upload/v1754924344/perfil_0_ijhdrb.png'
   const inputImagemRef = useRef(null)
@@ -97,7 +99,11 @@ if (file && file.type.startsWith('image/')) {
       const { data } = await API.get("/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUsuario(data);
+      setUsuario(data?.info);
+      if(data?.info.nome !== null){
+        router.push('/Home')
+      }
+    
       console.log("Usuário autenticado:", data);
     } catch (err) {
       console.error("Token inválido ou expirado:", err);
@@ -257,122 +263,115 @@ useEffect(() => {
     return `${min}:${sec}`;
   };
 
+  async function handleSaveName(){
+
+    const token2 = localStorage.getItem("token");
+
+
+    if (!nome){
+      document.getElementById("nome").focus()
+      return;
+    }
+
+    let imagemBase64 = ''
+
+    if (arquivoImagem) {
+      try {
+        imagemBase64 = await converterParaBase64(arquivoImagem)
+      } catch (error) {
+        console.error('Erro ao converter imagem:', error)
+      }
+    }
+
+   
+    try {
+     
+      const update = await API.post("/updateProfile", { nome, photo: imagemBase64 || null }, {
+        headers: { Authorization: `Bearer ${token2}` },
+      });
+
+      let resUpdate = update.data;
+
+      let token = resUpdate.token;
+      localStorage.setItem('token', token)
+      router.push('/Home')
+
+    } catch (error) {
+      console.log(error)
+    }
+    
+
+  }
+
+
   // ---------- RENDER ----------
   return (
     <>
       {usuario ? (
         
         <main className="flex flex-col text-center justify-center items-center h-screen gap-3">
-          <h1 className="text-2xl text-green-600">
-            Bem-vindo, {usuario?.info?.nome || "Usuário"}!
-          </h1>
-        </main>
-      
+        <section>
+          <p className="text-gray-700 font-medium text-2xl mb-5">Perfil</p>
+        </section>
+          <section>
+            <div className="flex flex-col items-center gap-2">
+              <div
+                className={`p-[5px] rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500 cursor-pointer`}
+                onClick={() => { inputImagemRef.current?.click() }}
+              >
+                <img
+                  src={foto}
+                  alt="Avatar"
+                  className="w-32 h-32 rounded-full object-cover bg-white"
+                />
+              </div>
+
+              <input
+                type="file"
+                accept="image/*"
+                ref={inputImagemRef}
+                onChange={handleSelecionarImagem}
+                className="hidden"
+              />
+              <small className="text-primary cursor-pointer hover:underline" onClick={() => inputImagemRef.current?.click()}>
+                Editar
+              </small>
+            </div>
+          </section>
+
+        <section className="flex flex-col gap-3 w-full">
+
+            <main className="flex text-left flex-col gap-0 px-6">
+              <div>
+                  <small className="text-gray-600 font-medium">
+                    Nome
+                  </small>
+              </div>
+              <div>
+              <input
+                  type="text"
+                  placeholder=""
+                  id="nome"
+                  autoFocus
+                  className="p-1 px-3 py-2 text-gray-700 w-full border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                />
+              </div>
+            </main>
+        </section>
+
+        <section className="mt-10 w-full px-6">
+          <Button2 disabled={!nome.trim()} className="w-full disabled:opacity-20 disabled:cursor-not-allowed" variant="success" onClick={handleSaveName}>
+            Continuar
+          </Button2>
+        </section>
+      </main>
       
       ) : (
         <>
 
-        {etapa === "telefone" && (
-            <main className="flex flex-col text-center justify-center items-center h-screen gap-3">
-              <section>
-                <p className="text-gray-700 font-medium">Perfil</p>
-              </section>
-                <section>
-                  <div className="flex flex-col items-center gap-2">
-                    <div
-                      className={`p-[5px] rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500 cursor-pointer`}
-                      onClick={() => { inputImagemRef.current?.click() }}
-                    >
-                      <img
-                        src={foto}
-                        alt="Avatar"
-                        className="w-32 h-32 rounded-full object-cover bg-white"
-                      />
-                    </div>
-
-                    <input
-                      type="file"
-                      accept="image/*"
-                      ref={inputImagemRef}
-                      onChange={handleSelecionarImagem}
-                      className="hidden"
-                    />
-                    <small className="text-primary cursor-pointer hover:underline" onClick={() => inputImagemRef.current?.click()}>
-                      Editar
-                    </small>
-                  </div>
-                </section>
-
-              <section className="flex flex-col gap-3">
-
-                <section className="flex text-left flex-col gap-0">
-                  <div>
-                      <small className="text-gray-600 font-medium">
-                        Nome
-                      </small>
-                  </div>
-                  <div>
-                  <input
-                      type="text"
-                      placeholder=""
-                      id="nome"
-                      autoFocus
-                      className="p-1 px-3 text-gray-700 w-[350px] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={nome}
-                      onChange={(e) => setNome(e.target.value)}
-                    />
-                  </div>
-                </section>
-
-                <section className="flex text-left flex-col gap-0">
-                  <div>
-                      <small className="text-gray-600 font-medium">
-                        Descrição
-                      </small>
-                  </div>
-                  <div>
-                  <input
-                      type="text"
-                      placeholder=""
-                      className="p-1 px-3 text-gray-700 w-[350px] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={nome}
-                      onChange={(e) => setNome(e.target.value)}
-                    />
-                  </div>
-                </section>
-
-             
-
-              </section>
-
-              <section>
-                <small className="text-gray-600 text-sm">
-                  Informe seu número. Em seguida, enviaremos um código para
-                  confirmar e prosseguir.
-                </small>
-              </section>
-
-              <section>
-                <PhoneInput
-                  placeholder="(00) 00000-0000"
-                  value={telefone}
-                  id="telefone"
-                  defaultCountry="BR"
-                  className="bg-white  text-gray-700 text-base outline-none border p-2 rounded-md focus:outline-none  focus:ring-blue-500 w-full"
-                  onChange={setTelefone}
-                />
-              </section>
-
-              <section className="mt-10 w-full px-6">
-                <Button2 disabled={!telefone.length} className="w-full disabled:opacity-20 disabled:cursor-not-allowed" variant="success" onClick={confirmarNumero}>
-                  Continuar
-                </Button2>
-              </section>
-            </main>
-          )}
-
-
-          {etapa === "telefone123" && (
+          {etapa === "telefone" && (
             <main className="flex flex-col text-center justify-center items-center h-screen gap-3">
               <section>
                 <WelcomeIcon />
