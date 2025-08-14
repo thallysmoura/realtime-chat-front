@@ -265,13 +265,9 @@ export default function Home() {
   // mostra loading overlay enquanto checamos a sessão inicial
   if (!sessionChecked) {
     return (
-      <div className='fixed top-0 left-0 w-screen h-screen bg-[#F9FAFB] flex items-center justify-center'>
-        <div className='animate-pulse'>
-          <div role="status">
-            <IconLoadingBar />
-            <span className="sr-only">Carregando...</span>
-          </div>
-        </div>
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-white z-50">
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-gray-600 text-sm">Conectando...</p>
       </div>
     )
   }

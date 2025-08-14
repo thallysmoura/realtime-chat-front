@@ -18,39 +18,24 @@ const Join = () => {
   const inputImagemRef = useRef(null)
   const [foto, setFoto] = useState(FOTO_PADRAO)
   const [arquivoImagem, setArquivoImagem] = useState(null)
-
-
   const [telefone, setTelefone] = useState("");
   const [codigo, setCodigo] = useState("");
   const [nome, setNome] = useState("");
-  const [etapa, setEtapa] = useState(""); // 'telefone', 'codigo', 'nome', 'bloqueado'
+  const [etapa, setEtapa] = useState(""); 
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
-  const [timer, setTimer] = useState(0); // segundos restantes para expiração
+  const [timer, setTimer] = useState(0);
   const [token, setToken] = useState( "");
   const [usuario, setUsuario] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [titleModal, setTitleModal] = useState("");
   const [contentModal, setContentModal] = useState(null);
-
-
-  /*
-  useEffect(() => {
-    const tokenLS = localStorage.getItem("token");
+  const [Carregando, setCarregando] = useState(true);
+  const [UsuarioNovo, setUsuarioNovo] = useState(true);
   
-    // limpa tudo, mas preserva o token
-    localStorage.clear();
-    if (tokenLS) {
-      localStorage.setItem("token", tokenLS);
-      setToken(tokenLS);
-    }
-  
-    // volta para a etapa inicial
-    setEtapa("telefone");
-    setTelefone("");
-  }, []);
-*/
 
+
+  
 
 const converterParaBase64 = (file) =>
 new Promise((resolve, reject) => {
@@ -68,17 +53,58 @@ if (file && file.type.startsWith('image/')) {
   document.getElementById("nome").focus()
 }
 }
-  
-  // useEffect roda só no cliente
-  useEffect(() => {
-    const telefoneLS = localStorage.getItem('telefone') || ''
-    const etapaLS = localStorage.getItem('etapa') || 'telefone'
-    const tokenLS = localStorage.getItem('token') || ''
 
-    setTelefone(telefoneLS)
-    setEtapa(etapaLS)
-    setToken(tokenLS)
-  }, [])
+
+
+
+
+
+
+   // ------------------- INICIALIZAÇÃO -------------------
+   useEffect(() => {
+    const tokenLS = localStorage.getItem("token");
+    const telefoneLS = localStorage.getItem("telefone") || "";
+    const etapaLS = localStorage.getItem("etapa") || "telefone";
+
+    if (tokenLS) {
+      setToken(tokenLS);
+      buscarUsuario(tokenLS);
+    } else {
+      localStorage.clear();
+      setEtapa("telefone");
+      setTelefone("");
+      setToken("");
+      setCarregando(false);
+    }
+
+    setTelefone(telefoneLS);
+    setEtapa(etapaLS);
+  }, []);
+
+  const buscarUsuario = async (token) => {
+    setCarregando(true);
+    try {
+      const { data } = await API.get("/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUsuario(data?.info);
+      setCarregando(false);
+      if (data?.info?.nome) {
+        setUsuarioNovo(false)
+        router.push("/Home");
+      }else{
+        setUsuarioNovo(true)
+      }
+    } catch (err) {
+      console.error("Token inválido ou expirado:", err);
+      localStorage.removeItem("token");
+      setToken("");
+      setCarregando(false);
+    }
+  };
+
+
+
 
   // ---------- FUNÇÕES AUXILIARES ----------
   const formatarTelefoneE164 = (valor) => {
@@ -94,27 +120,12 @@ if (file && file.type.startsWith('image/')) {
     setToken(novoToken);
   };
 
-  const buscarUsuario = async (token) => {
-    try {
-      const { data } = await API.get("/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsuario(data?.info);
-      if(data?.info.nome !== null){
-        router.push('/Home')
-      }
-    
-      console.log("Usuário autenticado:", data);
-    } catch (err) {
-      console.error("Token inválido ou expirado:", err);
-      localStorage.removeItem("token");
-      setToken("");
-    }
-  };
+
 
   // ---------- EFEITO DE INICIALIZAÇÃO ----------
 // ---------- EFEITO DE INICIALIZAÇÃO ----------
 useEffect(() => {
+  const token = localStorage.getItem("token");
   if (token) {
     buscarUsuario(token);
   }
@@ -303,11 +314,20 @@ useEffect(() => {
 
   }
 
+  // ------------------- LOADER FULLSCREEN -------------------
+  if (Carregando) {
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-white z-50">
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-gray-600 text-sm">Conectando...</p>
+      </div>
+    );
+  }
 
   // ---------- RENDER ----------
   return (
     <>
-      {usuario ? (
+      {(usuario && UsuarioNovo) ? (
         
         <main className="flex flex-col text-center justify-center items-center h-screen gap-3">
         <section>
