@@ -8,22 +8,29 @@ import Button2 from "@component/Button2";
 import Modal from "@component/ap";
 
 const Join = () => {
-  const [telefone, setTelefone] = useState(
-    localStorage.getItem("telefone") || ""
-  );
+  const [telefone, setTelefone] = useState("");
   const [codigo, setCodigo] = useState("");
   const [nome, setNome] = useState("");
-  const [etapa, setEtapa] = useState(
-    localStorage.getItem("etapa") || "telefone"
-  ); // 'telefone', 'codigo', 'nome', 'bloqueado'
+  const [etapa, setEtapa] = useState(""); // 'telefone', 'codigo', 'nome', 'bloqueado'
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
   const [timer, setTimer] = useState(0); // segundos restantes para expiração
-  const [token, setToken] = useState(localStorage.getItem("token") || "");
+  const [token, setToken] = useState( "");
   const [usuario, setUsuario] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [titleModal, setTitleModal] = useState("");
   const [contentModal, setContentModal] = useState(null);
+
+  // useEffect roda só no cliente
+  useEffect(() => {
+    const telefoneLS = localStorage.getItem('telefone') || ''
+    const etapaLS = localStorage.getItem('etapa') || 'telefone'
+    const tokenLS = localStorage.getItem('token') || ''
+
+    setTelefone(telefoneLS)
+    setEtapa(etapaLS)
+    setToken(tokenLS)
+  }, [])
 
   // ---------- FUNÇÕES AUXILIARES ----------
   const formatarTelefoneE164 = (valor) => {
@@ -128,7 +135,7 @@ const Join = () => {
       });
       salvarToken(data.token); // SALVA TOKEN E REMOVE OUTROS DADOS
       setEtapa("nome");
-      localStorage.setItem("etapa", "nome");
+      // localStorage.setItem("etapa", "nome");
       setCodigo("");
     } catch (err) {
       const mensagem = err.response?.data?.erro || "Código inválido";
@@ -208,7 +215,7 @@ const Join = () => {
       {usuario ? (
         <main className="flex flex-col text-center justify-center items-center h-screen gap-3">
           <h1 className="text-2xl text-green-600">
-            Bem-vindo, {usuario.nome || "Usuário"}!
+            Bem-vindo, {usuario?.info?.nome || "Usuário"}!
           </h1>
         </main>
       ) : (
