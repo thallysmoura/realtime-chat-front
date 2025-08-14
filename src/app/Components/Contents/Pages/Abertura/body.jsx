@@ -12,7 +12,7 @@ const Body = () => {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      router.push('/Home'); 
+      router.push('/Join'); 
     }, 500); 
     return () => clearTimeout(timeout);
   }, [router])

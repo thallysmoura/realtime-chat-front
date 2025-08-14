@@ -113,6 +113,13 @@ async function notification(novaMensagem) {
         icon: novaMensagem.photo, // ícone da sua aplicação
         tag: novaMensagem.texto, // evita duplicar notificações da mesma mensagem
       });
+
+      notification.onclick = () => {
+        window.focus();
+        router.push(`/Room/${novaMensagem.id_sala}`); // ou a rota da sua sala
+        notification.close();
+      };
+
     }
   }
 }

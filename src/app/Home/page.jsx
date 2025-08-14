@@ -448,8 +448,8 @@ export default function Home() {
 
                   {MyRooms.length > 0 && (
                     <div className="mt-10 text-left">
-                      Recentes
-                      <div className="grid gap-10 grid-cols-1 sm:grid-cols-2 md:grid-cols-3  bg-gray-100 shadow-xl p-5 rounded-md">
+                          <span className=' text-[30px] font-extrabold text-gray-700'>Recentes</span>
+                      <div className="grid mt-5 gap-10 grid-cols-1 sm:grid-cols-2 md:grid-cols-3  bg-gray-100 shadow-xl p-5 rounded-md">
                         {MyRooms?.map((i, index) => (
                           <div
                             key={index}
